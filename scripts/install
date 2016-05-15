@@ -1,0 +1,53 @@
+#!/bin/sh
+
+INSTALL_DIR=/home/uploader
+
+if [ -d ${INSTALL_DIR} ]; then
+	rm -rf ${INSTALL_DIR}
+fi
+
+mkdir -p ${INSTALL_DIR}
+
+if [ ! -d ${INSTALL_DIR}/config ]; then
+	mkdir -p ${INSTALL_DIR}/config
+fi
+
+echo "Copying uploader.conf to ${INSTALL_DIR}/config"
+cp -f config/uploader.conf ${INSTALL_DIR}/config
+
+if [ ! -d ${INSTALL_DIR}/logs ]; then
+	mkdir ${INSTALL_DIR}/logs
+fi
+
+if [ ! -d ${INSTALL_DIR}/libs ]; then
+	mkdir -p ${INSTALL_DIR}/libs
+fi
+
+echo "Copying libjson.so libev.so and libcurl.so to ${INSTALL_DIR}/libs"
+cp -f libs/libjson.so libs/libev.so.4.0.0 libs/libcurl.so.4.4.0 ${INSTALL_DIR}/libs
+
+/bin/sh -c "cd ${INSTALL_DIR}/libs; chmod +x ./*; ln -s libev.so.4.0.0 libev.so.4; ln -s libev.so.4 libev.so; ln -s libcurl.so.4.4.0 libcurl.so.4;ln -s libcurl.so.4 libcurl.so"
+
+if [ ! -d ${INSTALL_DIR}/sbin ]; then
+	mkdir -p ${INSTALL_DIR}/sbin
+fi
+
+echo "Copying uploader to ${INSTALL_DIR}/sbin..."
+cp -f sbin/MediaFileUploader ${INSTALL_DIR}/sbin
+
+if [ ! -d /etc/ld.so.conf.d ]; then
+	mkdir -p /etc/ld.so.conf.d
+fi
+
+echo "Copying uploader.so.conf to /etc/ld.so.conf.d"
+cp -f config/uploader.so.conf /etc/ld.so.conf.d
+ldconfig
+
+echo "Copying \"uploader\" to /bin"
+[ ! -x scripts/uploader ] || chmod +x scripts/uploader
+cp -f scripts/uploader /bin
+
+echo "Install success"
+echo "Directory: $INSTALL_DIR"
+echo -n "Usage: "
+echo "uploader {start|stop|restart|status|version|help}"

@@ -1,0 +1,115 @@
+#!/bin/sh
+#
+# description: Starts and stops the uploader daemon \
+#	       used to provide media files uploading.
+#
+# pidfile:
+# config:  /home/uploader/config/uploader.conf
+
+# The installed directory of uploader
+UPLOADER_PREFIX=/home/uploader
+
+# Avoid using root's TMPDIR
+unset TMPDIR
+
+# Check that uploader.conf exists.
+[ -f ${UPLOADER_PREFIX}/config/uploader.conf ] || exit 6
+
+RETVAL=0
+
+start()
+{
+    KIND="MediaFileUploader"
+	echo -n $"Starting $KIND services: "
+    ${UPLOADER_PREFIX}/sbin/${KIND} -c ${UPLOADER_PREFIX}/config/uploader.conf &
+	echo
+
+	# check whether it is up
+	ps -ef | grep ${KIND} | grep -v grep 2>/dev/null
+
+	RETVAL=$?
+	if [ $RETVAL -eq 0 ]; then
+		echo "Service \"${KIND}\" starts success"
+	else
+		echo "Service \"${KIND}\" starts failed"
+	fi
+
+	return $RETVAL
+}
+
+stop()
+{
+	KIND="MediaFileUploader"
+	echo -n $"Shutting down $KIND services: "
+	killall ${KIND}
+	ps -ef | grep ${KIND} | grep -v grep  2>/dev/null
+	RETVAL=$?
+	echo
+	if [[ $RETVAL != 0 ]]; then
+		echo "Service \"${KIND}\" stops success"
+	else
+		echo "Service \"${KIND}\" stops failed"
+	fi
+
+	return $RETVAL
+}
+
+restart()
+{
+	stop
+	start
+}
+
+status()
+{
+	KIND="MediaFileUploader"
+	ps -ef | grep $KIND | grep -v grep  2>/dev/null
+	RETVAL=$?
+	if [[ $RETVAL == 0 ]]; then
+		echo $KIND is running...
+	else
+		echo $KIND is stopped
+	fi
+
+	return $RETVAL
+}
+version()
+{
+    KIND="MediaFileUploader"
+    ${UPLOADER_PREFIX}/sbin/${KIND} -v
+}
+
+help()
+{
+    KIND="MediaFileUploader"
+    ${UPLOADER_PREFIX}/sbin/${KIND} -h
+}
+
+case "$1" in
+  start)
+  	start
+	;;
+  stop)
+  	stop
+	;;
+  restart)
+  	restart
+	;;
+  reload)
+  	reload
+	;;
+  status)
+  	status
+	;;
+  version)
+    version
+    ;;
+  help)
+    help
+    ;;
+  *)
+	echo $"Usage: $0 {start|stop|restart|status|version|help}"
+	exit 2
+esac
+
+exit $?

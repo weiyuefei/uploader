@@ -1,0 +1,40 @@
+#!/bin/sh
+
+PACK_DIRNAME=uploader
+
+# Get the version string
+VERSION="V"`cat src/version.h | grep UPLOADER_VERSION | head -1 | awk '{ print $3 }'`
+
+if [ -d packets ]; then
+    rm -rf packets
+fi
+
+mkdir -p packets/uploader
+
+echo "Copying directories config and logs to packets/uploader"
+cp -rf config packets/uploader
+cp -rf logs packets/uploader
+
+mkdir -p packets/uploader/libs
+
+echo "Copying libs to packets/uploader/libs"
+cp -f libs/jsoncpp/libjson.so packets/uploader/libs
+cp -f libs/libev/libev.so.4.0.0 packets/uploader/libs
+cp -f libs/libcurl/libcurl.so.4.4.0 packets/uploader/libs
+
+mkdir -p packets/uploader/sbin
+
+echo "Copying MediaFileUploader to packets/uploader/sbin"
+cp -f sbin/MediaFileUploader packets/uploader/sbin
+
+echo "Copying directory scripts to packets/uploader"
+chmod +x scripts/*
+[ -d packets/uploader/scripts ] || mkdir -p packets/uploader/scripts
+cp -f scripts/uploader packets/uploader/scripts
+
+cp -f scripts/install packets/uploader
+
+echo "Starting to build the tarball"
+/bin/sh -c "cd packets; tar zcvf ${PACK_DIRNAME}-${VERSION}.tar.gz ${PACK_DIRNAME}"
+
+echo "Make tarball success~"

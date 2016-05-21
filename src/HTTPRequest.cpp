@@ -54,7 +54,7 @@ ERR_CODE HTTPRequest::getRequest(string url)
     ERR_CODE retcode = ERR_NoErr;
     long httpResponseCode = 0;
 
-    curl_global_init(CURL_GLOBAL_ALL);
+    //curl_global_init(CURL_GLOBAL_ALL);
 
     // get the easy curl handle
     curlhandle = curl_easy_init();
@@ -69,7 +69,8 @@ ERR_CODE HTTPRequest::getRequest(string url)
 
     // set curl options
     curl_easy_setopt(curlhandle, CURLOPT_URL, url.c_str());
-
+    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+    
     curl_easy_setopt(curlhandle, CURLOPT_WRITEFUNCTION, write_data);
     curl_easy_setopt(curlhandle, CURLOPT_WRITEDATA, this);
 
@@ -115,7 +116,6 @@ ERR_CODE HTTPRequest::getRequest(string url)
 next:
 
     curl_easy_cleanup(curlhandle);
-    curl_global_cleanup();
 
     return retcode;
 }
@@ -127,13 +127,10 @@ ERR_CODE HTTPRequest::postRequest(string url, string data)
     ERR_CODE retcode = ERR_NoErr;
     long httpResponseCode = 0;
 
-    curl_global_init(CURL_GLOBAL_ALL);
-
     /* get a curl handle */
     curlhandle = curl_easy_init();
     if (curlhandle == NULL)
     {
-        curl_global_cleanup();
         LOG_ERROR("###### postRequest::curl init failed");
         return ERR_CurlFail;
     }
@@ -143,7 +140,8 @@ ERR_CODE HTTPRequest::postRequest(string url, string data)
        data. 
     */
     curl_easy_setopt(curlhandle, CURLOPT_URL, url.c_str());
-
+    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+    
     /* Custom HTTP headers */
     struct curl_slist *list = NULL;
     list = curl_slist_append(list, "Content-Type: application/json;charset=UTF-8");
@@ -191,7 +189,6 @@ next:
 
     curl_slist_free_all(list);
     curl_easy_cleanup(curlhandle);
-    curl_global_cleanup();
 
     return retcode;
 }

@@ -56,7 +56,7 @@ size_t read_cb(char *buffer, size_t size, size_t nitems, void *instream)
 
 CURL *curl_init()
 {
-    curl_global_init(CURL_GLOBAL_DEFAULT);
+    //curl_global_init(CURL_GLOBAL_DEFAULT);
     CURL *curl = curl_easy_init();
     if(NULL == curl)
     {
@@ -72,6 +72,8 @@ void curl_set_upload_opt(CURL *curl, const string url,
 {
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_USERPWD, user_key.c_str());
+    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+    
     // use the default read callback function
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
     curl_easy_setopt(curl, CURLOPT_READDATA, file_handle);
@@ -85,7 +87,7 @@ void curl_set_upload_opt(CURL *curl, const string url,
 void curl_exit(CURL *curl)
 {
     curl_easy_cleanup(curl);
-    curl_global_cleanup();
+    //curl_global_cleanup();
 }
 
 CURLcode curl_perform(CURL *curl)

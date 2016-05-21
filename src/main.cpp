@@ -120,6 +120,8 @@ int main(int argc, char **argv)
     LOG_INFO("Set resource limit to unlimited");
 #endif
 
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+
     // start the update checking thread
     CheckUpdate mainThread;
     mainThread.Initialize();
@@ -136,6 +138,8 @@ int main(int argc, char **argv)
         ::sleep(1000);
     }
 
+    curl_global_cleanup();
+    
     delete cycle;
     cycle = NULL;
     delete configSettings;
